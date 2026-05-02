@@ -1,0 +1,81 @@
+{% extends "shared/base.html" %}
+{% block title %}Tasks – TaskFlow{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{% if user.profile.is_admin %}All Tasks{% else %}My Tasks{% endif %}</h1>
+    </div>
+</div>
+
+<div class="filter-bar">
+    <label>Filter by status:</label>
+    <form method="get" style="display:flex; gap:8px; align-items:center;">
+        <select name="status" onchange="this.form.submit()">
+            <option value="">All</option>
+            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+            <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+        </select>
+        {% if status_filter %}
+        <a href="/tasks/" class="btn btn-sm btn-secondary">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+<div class="card">
+    {% if tasks %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Project</th>
+                    {% if user.profile.is_admin %}<th>Assigned To</th>{% endif %}
+                    <th>Status</th>
+                    <th>Due Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <td>
+                        <a href="/tasks/{{ task.pk }}/">{{ task.title }}</a>
+                        {% if task.overdue %}
+                        <span class="overdue-badge">Overdue</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/projects/{{ task.project.pk }}/">{{ task.project.name }}</a>
+                    </td>
+                    {% if user.profile.is_admin %}
+                    <td>{{ task.assigned_to.username|default:"Unassigned" }}</td>
+                    {% endif %}
+                    <td><span class="status-badge status-{{ task.status }}">{{ task.get_status_display }}</span></td>
+                    <td>{% if task.due_date %}{{ task.due_date|date:"M d, Y" }}{% else %}—{% endif %}</td>
+                    <td>
+                        <a href="/tasks/{{ task.pk }}/edit/" class="btn btn-sm btn-secondary">
+                            {% if user.profile.is_admin %}Edit{% else %}Update{% endif %}
+                        </a>
+                        {% if user.profile.is_admin %}
+                        <a href="/tasks/{{ task.pk }}/delete/" class="btn btn-sm btn-danger">Del</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <p>
+            {% if status_filter %}No tasks with status "{{ status_filter }}".
+            {% elif user.profile.is_admin %}No tasks yet. Add tasks to your projects.
+            {% else %}No tasks assigned to you yet.{% endif %}
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

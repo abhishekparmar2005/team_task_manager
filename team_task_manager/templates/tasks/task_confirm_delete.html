@@ -1,0 +1,31 @@
+{% extends "shared/base.html" %}
+{% block title %}Delete Task – TaskFlow{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="/tasks/">Tasks</a>
+    <span class="sep">/</span>
+    <a href="/tasks/{{ task.pk }}/">{{ task.title }}</a>
+    <span class="sep">/</span>
+    <span>Delete</span>
+</div>
+
+<div class="form-card delete-box">
+    <div class="warning-icon">⚠️</div>
+    <h2 style="margin-bottom:8px;">Delete "{{ task.title }}"?</h2>
+    <p style="color:var(--text-muted); margin-bottom:6px;">
+        Project: <strong>{{ task.project.name }}</strong>
+    </p>
+    <p style="color:var(--text-muted); margin-bottom:20px;">
+        This task will be permanently deleted and cannot be recovered.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div style="display:flex; gap:10px;">
+            <button type="submit" class="btn btn-danger">Yes, Delete Task</button>
+            <a href="/tasks/{{ task.pk }}/" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

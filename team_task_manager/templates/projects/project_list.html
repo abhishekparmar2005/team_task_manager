@@ -1,0 +1,64 @@
+{% extends "shared/base.html" %}
+{% block title %}Projects – TaskFlow{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Projects</h1>
+        <p>{{ projects|length }} project{{ projects|length|pluralize }} found</p>
+    </div>
+    {% if user.profile.is_admin %}
+    <div class="page-actions">
+        <a href="/projects/new/" class="btn btn-primary">+ New Project</a>
+    </div>
+    {% endif %}
+</div>
+
+{% if projects %}
+<div class="project-grid">
+    {% for project in projects %}
+    <div class="project-card">
+        <h3><a href="/projects/{{ project.pk }}/">{{ project.name }}</a></h3>
+        <p>{{ project.description|default:"No description."|truncatechars:100 }}</p>
+
+        {% with stats=project.get_task_stats %}
+        {% if stats.total > 0 %}
+        <div style="margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:var(--text-muted); margin-bottom:4px;">
+                <span>Progress</span>
+                <span>{{ stats.completed }}/{{ stats.total }} tasks</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {% widthratio stats.completed stats.total 100 %}%"></div>
+            </div>
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="project-meta">
+            <span>{{ project.members.count }} member{{ project.members.count|pluralize }}</span>
+            <span>{{ project.created_at|date:"M d, Y" }}</span>
+            {% if user.profile.is_admin %}
+            <div class="project-actions">
+                <a href="/projects/{{ project.pk }}/edit/" class="btn btn-sm btn-secondary">Edit</a>
+                <a href="/projects/{{ project.pk }}/delete/" class="btn btn-sm btn-danger">Delete</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <div class="empty-icon">📁</div>
+        {% if user.profile.is_admin %}
+        <p>You haven't created any projects yet.</p>
+        <a href="/projects/new/" class="btn btn-primary">Create your first project</a>
+        {% else %}
+        <p>You haven't been added to any project yet. Ask your admin.</p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

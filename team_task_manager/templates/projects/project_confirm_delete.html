@@ -1,0 +1,28 @@
+{% extends "shared/base.html" %}
+{% block title %}Delete Project – TaskFlow{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="/projects/">Projects</a>
+    <span class="sep">/</span>
+    <a href="/projects/{{ project.pk }}/">{{ project.name }}</a>
+    <span class="sep">/</span>
+    <span>Delete</span>
+</div>
+
+<div class="form-card delete-box">
+    <div class="warning-icon">⚠️</div>
+    <h2 style="margin-bottom:8px;">Delete "{{ project.name }}"?</h2>
+    <p style="color:var(--text-muted); margin-bottom:20px;">
+        This will permanently delete the project and <strong>all its tasks</strong>. This action cannot be undone.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div style="display:flex; gap:10px;">
+            <button type="submit" class="btn btn-danger">Yes, Delete Project</button>
+            <a href="/projects/{{ project.pk }}/" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

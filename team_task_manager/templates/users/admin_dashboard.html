@@ -1,0 +1,159 @@
+{% extends "shared/base.html" %}
+{% block title %}Admin Dashboard – TaskFlow{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Welcome back, {{ user.username }} 👋</h1>
+        <p>Here's what's going on in your projects.</p>
+    </div>
+    <div class="page-actions">
+        <a href="/projects/new/" class="btn btn-primary">+ New Project</a>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+    <div class="stat-card primary">
+        <div class="stat-label">Projects</div>
+        <div class="stat-value">{{ stats.total_projects }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Total Tasks</div>
+        <div class="stat-value">{{ stats.total_tasks }}</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-label">In Progress</div>
+        <div class="stat-value">{{ stats.in_progress }}</div>
+    </div>
+    <div class="stat-card success">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value">{{ stats.completed }}</div>
+    </div>
+    <div class="stat-card danger">
+        <div class="stat-label">Overdue</div>
+        <div class="stat-value">{{ stats.overdue }}</div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Recent Projects -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Recent Projects</span>
+            <a href="/projects/" class="btn btn-secondary btn-sm">View all</a>
+        </div>
+        {% if projects %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Members</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in projects %}
+                    <tr>
+                        <td><a href="/projects/{{ p.pk }}/">{{ p.name }}</a></td>
+                        <td>{{ p.members.count }}</td>
+                        <td>{{ p.created_at|date:"M d, Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📁</div>
+            <p>No projects yet. Create your first one!</p>
+            <a href="/projects/new/" class="btn btn-primary">Create Project</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Overdue Tasks -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title" style="color: var(--danger);">⚠ Overdue Tasks</span>
+            {% if stats.overdue > 0 %}
+            <a href="/tasks/overdue/" class="btn btn-secondary btn-sm">View all</a>
+            {% endif %}
+        </div>
+        {% if overdue_tasks %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Project</th>
+                        <th>Due Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in overdue_tasks %}
+                    <tr>
+                        <td><a href="/tasks/{{ task.pk }}/">{{ task.title }}</a></td>
+                        <td>{{ task.project.name }}</td>
+                        <td style="color: var(--danger);">{{ task.due_date|date:"M d" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">✅</div>
+            <p>No overdue tasks. Keep it up!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Recent Tasks -->
+    <div class="card full-width">
+        <div class="card-header">
+            <span class="card-title">Recent Tasks</span>
+            <a href="/tasks/" class="btn btn-secondary btn-sm">View all</a>
+        </div>
+        {% if recent_tasks %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Project</th>
+                        <th>Assigned To</th>
+                        <th>Status</th>
+                        <th>Due Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in recent_tasks %}
+                    <tr>
+                        <td><a href="/tasks/{{ task.pk }}/">{{ task.title }}</a></td>
+                        <td>{{ task.project.name }}</td>
+                        <td>{{ task.assigned_to.username|default:"—" }}</td>
+                        <td><span class="status-badge status-{{ task.status }}">{{ task.get_status_display }}</span></td>
+                        <td>
+                            {% if task.due_date %}
+                                {{ task.due_date|date:"M d, Y" }}
+                                {% if task.is_overdue %}
+                                <span class="overdue-badge">Late</span>
+                                {% endif %}
+                            {% else %}—{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <p>No tasks yet. Add tasks to your projects.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

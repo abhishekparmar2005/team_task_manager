@@ -1,0 +1,96 @@
+{% extends "shared/base.html" %}
+{% load task_filters %}
+{% block title %}{{ task.title }} – TaskFlow{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="/tasks/">Tasks</a>
+    <span class="sep">/</span>
+    <a href="/projects/{{ task.project.pk }}/">{{ task.project.name }}</a>
+    <span class="sep">/</span>
+    <span>{{ task.title }}</span>
+</div>
+
+<div class="page-header">
+    <div>
+        <h1>
+            {{ task.title }}
+            {% if task.is_overdue %}
+            <span class="overdue-badge" style="font-size:0.85rem;">Overdue</span>
+            {% endif %}
+        </h1>
+    </div>
+    <div class="page-actions">
+        <a href="/tasks/{{ task.pk }}/edit/" class="btn btn-primary">
+            {% if user.profile.is_admin %}Edit Task{% else %}Update Status{% endif %}
+        </a>
+        {% if user.profile.is_admin %}
+        <a href="/tasks/{{ task.pk }}/delete/" class="btn btn-danger">Delete</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="detail-grid">
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Description</span>
+        </div>
+        {% if task.description %}
+        <p style="color:var(--text); line-height:1.7;">{{ task.description }}</p>
+        {% else %}
+        <p style="color:var(--text-muted);">No description provided.</p>
+        {% endif %}
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="card">
+            <div class="card-title" style="margin-bottom:16px;">Task Details</div>
+            <div class="detail-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Status</span>
+                    <span><span class="status-badge status-{{ task.status }}">{{ task.get_status_display }}</span></span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Project</span>
+                    <span class="meta-value">
+                        <a href="/projects/{{ task.project.pk }}/">{{ task.project.name }}</a>
+                    </span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Assigned To</span>
+                    <span class="meta-value">{{ task.assigned_to.username|default:"Unassigned" }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Due Date</span>
+                    <span class="meta-value" {% if task.is_overdue %}style="color:var(--danger);"{% endif %}>
+                        {% if task.due_date %}{{ task.due_date|date:"F d, Y" }}{% else %}No due date{% endif %}
+                    </span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Created</span>
+                    <span class="meta-value">{{ task.created_at|date:"M d, Y" }}</span>
+                </div>
+            </div>
+        </div>
+
+        {% if user.profile.is_member and task.assigned_to == user %}
+        <div class="card">
+            <div class="card-title" style="margin-bottom:12px;">Quick Status Update</div>
+            {% if task.next_status %}
+            <form method="post" action="/tasks/{{ task.pk }}/update-status/">
+                {% csrf_token %}
+                <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:12px;">
+                    Move this task to the next stage?
+                </p>
+                <button type="submit" class="btn btn-success" style="width:100%; justify-content:center;">
+                    Mark as {{ task.next_status|title|replace:"_":" " }}
+                </button>
+            </form>
+            {% else %}
+            <p style="color:var(--success); font-weight:600; font-size:0.9rem;">✅ Task is completed!</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

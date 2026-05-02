@@ -1,0 +1,56 @@
+{% extends "shared/base.html" %}
+{% block title %}Overdue Tasks – TaskFlow{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 style="color:var(--danger);">⚠ Overdue Tasks</h1>
+        <p>Tasks that are past their due date and not yet completed.</p>
+    </div>
+    <div class="page-actions">
+        <a href="/dashboard/" class="btn btn-secondary">← Dashboard</a>
+    </div>
+</div>
+
+<div class="card">
+    {% if tasks %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Project</th>
+                    <th>Assigned To</th>
+                    <th>Status</th>
+                    <th>Due Date</th>
+                    <th>Days Late</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <td><a href="/tasks/{{ task.pk }}/">{{ task.title }}</a></td>
+                    <td><a href="/projects/{{ task.project.pk }}/">{{ task.project.name }}</a></td>
+                    <td>{{ task.assigned_to.username|default:"Unassigned" }}</td>
+                    <td><span class="status-badge status-{{ task.status }}">{{ task.get_status_display }}</span></td>
+                    <td style="color:var(--danger);">{{ task.due_date|date:"M d, Y" }}</td>
+                    <td style="color:var(--danger); font-weight:600;">
+                        {{ today|timeuntil:task.due_date }}
+                    </td>
+                    <td>
+                        <a href="/tasks/{{ task.pk }}/edit/" class="btn btn-sm btn-secondary">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">✅</div>
+        <p>No overdue tasks. Everything is on track!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
