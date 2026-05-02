@@ -1,10 +1,11 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "NIXPACKS"
+    "builder": "NIXPACKS",
+    "buildCommand": "pip install -r requirements.txt && python manage.py collectstatic --noinput"
   },
   "deploy": {
-    "startCommand": "gunicorn core.wsgi --bind 0.0.0.0:$PORT",
+    "startCommand": "python manage.py migrate && gunicorn core.wsgi --bind 0.0.0.0:$PORT",
     "healthcheckPath": "/users/login/",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3
