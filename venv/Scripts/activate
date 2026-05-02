@@ -35,7 +35,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\Asus\Downloads\team_task_manager\team_task_manager\venv"
+VIRTUAL_ENV="C:\Users\Asus\Downloads\team_task_manager\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
